@@ -1,0 +1,7 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\Unity3DBackup]
+@="Execute Unity3DBackup"
+
+[HKEY_CLASSES_ROOT\Directory\shell\Unity3DBackup\command]
+@="\"C:\\Users\\ckugler\\Documents\\Dev Tools\\Shell Extensions\\Unity3DBackup.exe\" \"%1\""
