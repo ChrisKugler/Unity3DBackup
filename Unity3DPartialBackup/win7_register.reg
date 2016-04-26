@@ -1,0 +1,7 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\Unity3DPartialBackup]
+@="Execute Unity3DPartialBackup"
+
+[HKEY_CLASSES_ROOT\Directory\shell\Unity3DPartialBackup\command]
+@="\"C:\\Users\\ckugler\\Documents\\Dev Tools\\Shell Extensions\\Unity3DPartialBackup\\Unity3DPartialBackup.exe\" \"%1\""
