@@ -5,8 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Unity3DPartialBackup"
         mc:Ignorable="d"
-        Title="Unity3D Partial Backup" Height="452" Width="525">
-    <Grid>
+        Title="Unity3D Partial Backup" Height="475" Width="525">
+    <Window.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="bool2vis"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="0,0,0,-21">
         <ListBox x:Name="folders" HorizontalAlignment="Left" Height="242" Margin="10,31,0,0" VerticalAlignment="Top" Width="497" ItemsSource="{Binding Folders}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -17,7 +22,7 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button x:Name="button" Content="Make Backup" HorizontalAlignment="Left" Margin="410,278,0,0" VerticalAlignment="Top" Width="97" Command="{Binding MakeBackup}"/>
+        <Button x:Name="button" Content="Make Backup" HorizontalAlignment="Left" Margin="410,278,0,0" VerticalAlignment="Top" Width="97" Click="button_Click"/><!-- Command="{Binding MakeBackup}"/>-->
         <ListBox x:Name="messages" HorizontalAlignment="Left" Height="107" Margin="10,303,0,0" VerticalAlignment="Top" Width="497" ItemsSource="{Binding Messages}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -26,6 +31,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Make sure that Unity is closed and all files in your project are not in use." VerticalAlignment="Top" Width="497"/>
+        <ProgressBar HorizontalAlignment="Left" Height="21" Margin="10,415,0,0" VerticalAlignment="Top" Width="497" IsIndeterminate="True" Visibility="{Binding InProgress, Converter={StaticResource bool2vis}}"/>
 
     </Grid>
 </Window>

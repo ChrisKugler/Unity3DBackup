@@ -18,22 +18,21 @@ namespace Unity3DPartialBackup
 
         private string rootDirectory;
         private string assetsDirectory;
-        private string projectSettingsDirectory; 
-        public List<FolderSelectionItem> Folders { get; set; }
-        public ObservableCollection<string> Messages { get; set; }
+        private string projectSettingsDirectory;
+        private bool inProgress;
 
         public VM()
         {
             // arg 0 is the executable, arg 1 is the director selected from the shell. 
             string[] cmdArgs = Environment.GetCommandLineArgs();
-            if(cmdArgs.Length > 1 && cmdArgs[1] != null)
+            if (cmdArgs.Length > 1 && cmdArgs[1] != null)
                 this.RootDirectory = cmdArgs[1];
 
             if (string.IsNullOrEmpty(this.RootDirectory))
                 MessageBox.Show("Root Directoy was not valid... check the shell extension.");
             //this.RootDirectory = @"C:\Users\ckugler\Documents\Unity Projects\Dungeoneer2";
             this.Folders = new List<FolderSelectionItem>();
-            this.MakeBackup = new RelayCommand(this.OnMakeBackup);
+            this.InProgress = false;             
             this.Messages = new ObservableCollection<string>();
             this.GetFolders();
         }
@@ -53,13 +52,13 @@ namespace Unity3DPartialBackup
             {
                 MessageBox.Show("assets directory could not be found. Is this a Unity3D Project?");
                 return;
-            }            
+            }
 
             this.Folders.Add(new FolderSelectionItem("ProjectSettings", this.projectSettingsDirectory) { Selected = true });
             string[] assetDirectories = Directory.GetDirectories(this.assetsDirectory);
             if (assetDirectories != null)
             {
-                foreach(string assetDir in assetDirectories)
+                foreach (string assetDir in assetDirectories)
                 {
                     this.Folders.Add(new FolderSelectionItem("Assets\\" + Path.GetFileName(assetDir), assetDir));
                 }
@@ -67,58 +66,64 @@ namespace Unity3DPartialBackup
 
             OnPropertyChanged("Folders");
         }
-
-        public void OnMakeBackup(object p)
+        
+        private void AddMessage(string msg)
         {
-            this.Messages.Add("Creating temporary file location.");
-            string tmpDir = Path.GetTempPath();
-            DirectoryInfo rootDirInfo = new DirectoryInfo(this.rootDirectory);
-            tmpDir = Path.Combine(tmpDir, string.Format("{0}Partial_{1}", rootDirInfo.Name, DateTime.Now.ToString("MM_dd_yyyy_HH_mm")));
-            if (Directory.Exists(tmpDir))
-                Directory.Delete(tmpDir, true);
-
-            Directory.CreateDirectory(tmpDir);
-            string zipFile = tmpDir + ".zip";
-            if (File.Exists(zipFile))
-                File.Delete(zipFile);
-
-            try
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                foreach (FolderSelectionItem folder in this.Folders.Where(x => x.Selected))
-                {
-                    this.Messages.Add(string.Format("Copying {0} to temp directory.", folder.Path));
-                    DirectoryHelper.Copy(folder.Path, Path.Combine(tmpDir, folder.Name), true, ".meta");
-                }
+                this.Messages.Add(msg);
+            });
+        }
 
-                // zip the backup.          
-                this.Messages.Add("Creating zip file.");
-                ZipFile.CreateFromDirectory(tmpDir, zipFile);
-                if (File.Exists(zipFile))
-                {
-                    Messages.Add("Zip file created.");
-                    FileInfo zipInfo = new FileInfo(zipFile);
-                    File.Move(zipFile, Path.Combine(rootDirInfo.Parent.FullName, zipInfo.Name));
-                    Messages.Add(string.Format("Zip file {0} moved.", zipInfo.Name));
-                }
-            }
-            catch (Exception ex)
+        public async Task MakeBackup()
+        {
+            await Task.Factory.StartNew(() =>
             {
-                MessageBox.Show(ex.Message + Environment.NewLine + ex.StackTrace);
-            }
-            finally
-            {
+                this.InProgress = true;                 
+                this.AddMessage("Creating temporary file location.");
+                string tmpDir = Path.GetTempPath();
+                DirectoryInfo rootDirInfo = new DirectoryInfo(this.rootDirectory);
+                tmpDir = Path.Combine(tmpDir, string.Format("{0}Partial_{1}", rootDirInfo.Name, DateTime.Now.ToString("MM_dd_yyyy_HH_mm")));
                 if (Directory.Exists(tmpDir))
                     Directory.Delete(tmpDir, true);
+
+                Directory.CreateDirectory(tmpDir);
+                string zipFile = tmpDir + ".zip";
                 if (File.Exists(zipFile))
                     File.Delete(zipFile);
-            }
 
-            MessageBoxResult res = MessageBox.Show("Backup Complete: Open Directory?", "Job's Done!", MessageBoxButton.YesNo);
-            if (res == MessageBoxResult.Yes)
-                Process.Start(rootDirInfo.Parent.FullName);
+                try
+                {
+                    foreach (FolderSelectionItem folder in this.Folders.Where(x => x.Selected))
+                    {
+                        this.AddMessage(string.Format("Copying {0} to temp directory.", folder.Path));
+                        DirectoryHelper.Copy(folder.Path, Path.Combine(tmpDir, folder.Name), true, ".meta");
+                    }
 
-            Application.Current.Shutdown();
-
+                    // zip the backup.          
+                    this.AddMessage("Creating zip file.");
+                    ZipFile.CreateFromDirectory(tmpDir, zipFile);
+                    if (File.Exists(zipFile))
+                    {
+                        this.AddMessage("Zip file created.");
+                        FileInfo zipInfo = new FileInfo(zipFile);
+                        File.Move(zipFile, Path.Combine(rootDirInfo.Parent.FullName, zipInfo.Name));
+                        this.AddMessage(string.Format("Zip file {0} moved.", zipInfo.Name));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message + Environment.NewLine + ex.StackTrace);
+                }
+                finally
+                {
+                    if (Directory.Exists(tmpDir))
+                        Directory.Delete(tmpDir, true);
+                    if (File.Exists(zipFile))
+                        File.Delete(zipFile);
+                }
+                this.InProgress = false;
+            });               
         }
 
         protected void OnPropertyChanged(string name)
@@ -134,6 +139,13 @@ namespace Unity3DPartialBackup
             set { if (this.rootDirectory != value) { this.rootDirectory = value; OnPropertyChanged("RootDirectory"); } }
         }
 
-        public RelayCommand MakeBackup { get; private set; }
+        public List<FolderSelectionItem> Folders { get; set; }
+        public ObservableCollection<string> Messages { get; set; }        
+
+        public bool InProgress
+        {
+            get { return this.inProgress; }
+            set { if (this.inProgress != value) { this.inProgress = value; OnPropertyChanged("InProgress"); } }
+        }
     }
 }
