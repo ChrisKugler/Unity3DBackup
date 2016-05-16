@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Unity3DPartialBackup"
-        mc:Ignorable="d"
+        mc:Ignorable="d"        
         Title="Unity3D Partial Backup" Height="475" Width="525">
     <Window.Resources>
         <ResourceDictionary>
@@ -12,7 +12,7 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid Margin="0,0,0,-21">
-        <ListBox x:Name="folders" HorizontalAlignment="Left" Height="242" Margin="10,31,0,0" VerticalAlignment="Top" Width="497" ItemsSource="{Binding Folders}">
+        <!--<ListBox x:Name="folders" HorizontalAlignment="Left" Height="242" Margin="10,31,0,0" VerticalAlignment="Top" Width="497" ItemsSource="{Binding Folders}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
@@ -21,7 +21,17 @@
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
-        </ListBox>
+        </ListBox>-->
+        <TreeView x:Name="folders" HorizontalAlignment="Left" Height="242" Margin="10,31,0,0" VerticalAlignment="Top" Width="497" ItemsSource="{Binding Folders}">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type local:FolderSelectionItem}" ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding Selected}"/>
+                        <TextBlock Text="{Binding Name}"/>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
         <Button x:Name="button" Content="Make Backup" HorizontalAlignment="Left" Margin="410,278,0,0" VerticalAlignment="Top" Width="97" Click="button_Click"/><!-- Command="{Binding MakeBackup}"/>-->
         <ListBox x:Name="messages" HorizontalAlignment="Left" Height="107" Margin="10,303,0,0" VerticalAlignment="Top" Width="497" ItemsSource="{Binding Messages}">
             <ListBox.ItemTemplate>

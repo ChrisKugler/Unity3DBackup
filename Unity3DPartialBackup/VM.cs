@@ -60,13 +60,31 @@ namespace Unity3DPartialBackup
             {
                 foreach (string assetDir in assetDirectories)
                 {
-                    this.Folders.Add(new FolderSelectionItem("Assets\\" + Path.GetFileName(assetDir), assetDir));
+                    FolderSelectionItem rootItem = new FolderSelectionItem(Path.GetFileName(assetDir), assetDir);
+                    this.BuildDirectoryTree(rootItem);
+                    this.Folders.Add(rootItem);
                 }
             }
 
             OnPropertyChanged("Folders");
         }
         
+        private void BuildDirectoryTree(FolderSelectionItem parent)
+        {
+            string[] children = Directory.GetDirectories(parent.Path);
+            if (children != null)
+            {
+                foreach (string directory in children)
+                {
+                    FolderSelectionItem item = new FolderSelectionItem(Path.GetFileName(directory), directory);
+                    //parent.Children.Add(item);
+                    parent.AddChild(item);
+                    this.BuildDirectoryTree(item);
+                }
+            }
+
+        }
+
         private void AddMessage(string msg)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -94,10 +112,11 @@ namespace Unity3DPartialBackup
 
                 try
                 {
-                    foreach (FolderSelectionItem folder in this.Folders.Where(x => x.Selected))
+                    foreach (FolderSelectionItem folder in this.Folders)
                     {
-                        this.AddMessage(string.Format("Copying {0} to temp directory.", folder.Path));
-                        DirectoryHelper.Copy(folder.Path, Path.Combine(tmpDir, folder.Name), true, ".meta");
+                        //this.AddMessage(string.Format("Copying {0} to temp directory.", folder.Path));
+                        //DirectoryHelper.Copy(folder.Path, Path.Combine(tmpDir, folder.Name), true, ".meta");
+                        this.Copy(folder, tmpDir);
                     }
 
                     // zip the backup.          
@@ -124,6 +143,18 @@ namespace Unity3DPartialBackup
                 }
                 this.InProgress = false;
             });               
+        }
+
+        private void Copy(FolderSelectionItem folder, string sourceDir)
+        {            
+            string targetDir = Path.Combine(sourceDir, folder.Name);
+            this.AddMessage(string.Format("Copying {0}.", folder.Path));
+            if (folder.Selected ?? false)                
+                DirectoryHelper.Copy(folder.Path, targetDir, false, ".meta");
+            foreach (FolderSelectionItem child in folder.Children)
+            {
+                this.Copy(child, targetDir);
+            }            
         }
 
         protected void OnPropertyChanged(string name)

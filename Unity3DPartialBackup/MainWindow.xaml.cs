@@ -37,7 +37,7 @@ namespace Unity3DPartialBackup
 
                 //MessageBoxResult res = MessageBox.Show("Backup Complete: Open Directory?", "Job's Done!", MessageBoxButton.YesNo);
                 //if (res == MessageBoxResult.Yes)
-                    Process.Start(new DirectoryInfo(vm.RootDirectory).Parent.FullName);
+                Process.Start(new DirectoryInfo(vm.RootDirectory).Parent.FullName);
 
                 Application.Current.Shutdown();
             }
