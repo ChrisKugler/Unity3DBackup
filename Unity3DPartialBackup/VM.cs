@@ -147,10 +147,13 @@ namespace Unity3DPartialBackup
 
         private void Copy(FolderSelectionItem folder, string sourceDir)
         {            
-            string targetDir = Path.Combine(sourceDir, folder.Name);
-            this.AddMessage(string.Format("Copying {0}.", folder.Path));
-            if (folder.Selected ?? false)                
+            string targetDir = Path.Combine(sourceDir, folder.Name);            
+            if (folder.Selected ?? false)
+            {
+                this.AddMessage(string.Format("Copying {0}.", folder.Path));
                 DirectoryHelper.Copy(folder.Path, targetDir, false, ".meta");
+            }
+                
             foreach (FolderSelectionItem child in folder.Children)
             {
                 this.Copy(child, targetDir);
