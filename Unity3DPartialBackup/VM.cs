@@ -30,7 +30,7 @@ namespace Unity3DPartialBackup
 
             if (string.IsNullOrEmpty(this.RootDirectory))
                 MessageBox.Show("Root Directoy was not valid... check the shell extension.");
-            //this.RootDirectory = @"C:\Users\ckugler\Documents\Unity Projects\Dungeoneer2";
+                        
             this.Folders = new List<FolderSelectionItem>();
             this.InProgress = false;             
             this.Messages = new ObservableCollection<string>();
@@ -76,8 +76,7 @@ namespace Unity3DPartialBackup
             {
                 foreach (string directory in children)
                 {
-                    FolderSelectionItem item = new FolderSelectionItem(Path.GetFileName(directory), directory);
-                    //parent.Children.Add(item);
+                    FolderSelectionItem item = new FolderSelectionItem(Path.GetFileName(directory), directory);                    
                     parent.AddChild(item);
                     this.BuildDirectoryTree(item);
                 }
@@ -113,9 +112,7 @@ namespace Unity3DPartialBackup
                 try
                 {
                     foreach (FolderSelectionItem folder in this.Folders)
-                    {
-                        //this.AddMessage(string.Format("Copying {0} to temp directory.", folder.Path));
-                        //DirectoryHelper.Copy(folder.Path, Path.Combine(tmpDir, folder.Name), true, ".meta");
+                    {                        
                         this.Copy(folder, tmpDir);
                     }
 
@@ -151,7 +148,7 @@ namespace Unity3DPartialBackup
             if (folder.Selected ?? false)
             {
                 this.AddMessage(string.Format("Copying {0}.", folder.Path));
-                DirectoryHelper.Copy(folder.Path, targetDir, false, ".meta");
+                DirectoryHelper.Copy(folder.Path, targetDir, false);
             }
                 
             foreach (FolderSelectionItem child in folder.Children)

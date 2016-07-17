@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -33,30 +33,27 @@ namespace Unity3DBackup
                     File.Delete(zip);
                 Console.WriteLine("Creating temporary location for project.");
                 try
-                {                                       
-                    // copy project to temp dir
-                    Console.WriteLine("Copying to temp location.");
-                    DirectoryHelper.Copy(rootDir, tmpDir, true);
+                {                                                                      
+                    Console.WriteLine("Copying Project Settings to temp location.");
+                    DirectoryHelper.Copy(Path.Combine(rootDir, "ProjectSettings"), 
+                        Path.Combine(tmpDir, "ProjectSettings"),
+                        true);
 
-                    Console.WriteLine("Deleting generated directories...");
-                    // remove generated directories.
-                    string targetPath = Path.Combine(tmpDir, "Library"); 
-                    if(Directory.Exists(targetPath))
-                        Directory.Delete(targetPath, true);
-                    targetPath = Path.Combine(tmpDir, "obj");
-                    if(Directory.Exists(targetPath))
-                        Directory.Delete(targetPath, true);
-
+                    Console.WriteLine("Copying Assets to temp location.");
+                    DirectoryHelper.Copy(Path.Combine(rootDir, "Assets"), 
+                        Path.Combine(tmpDir, "Assets"),
+                        true);                    
+                 
                     // zip                    
                     Console.WriteLine("Creating zip file...");
                     ZipFile.CreateFromDirectory(tmpDir, zip);
+
                     // copy zip file to the parent of the project root.
                     if (File.Exists(zip))
                     {
                         Console.WriteLine("Moving zip to project directory.");
                         FileInfo zipInfo = new FileInfo(zip); 
-                        File.Move(zip, Path.Combine(rootDirInfo.Parent.FullName, zipInfo.Name));
-                       // Process.Start(rootDirInfo.Parent.FullName);
+                        File.Move(zip, Path.Combine(rootDirInfo.Parent.FullName, zipInfo.Name));                       
                     }
                 }
                 catch (Exception ex)
@@ -74,9 +71,7 @@ namespace Unity3DBackup
                 }
             }            
             else
-                Console.WriteLine("Invalid or non-existent directory provided.");
-
-            //return 0;
+                Console.WriteLine("Invalid or non-existent directory provided.");            
         }
     }
 }

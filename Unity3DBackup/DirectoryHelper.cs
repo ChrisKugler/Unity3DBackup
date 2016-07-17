@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace Unity3DBackup
         /// <param name="sourceDirName"></param>
         /// <param name="destDirName"></param>
         /// <param name="copySubDirs"></param>
-        public static void Copy(string sourceDirName, string destDirName, bool copySubDirs)
+        public static void Copy(string sourceDirName, string destDirName, bool copySubDirs, params string[] excludedExtensions)
         {
             // Get the subdirectories for the specified directory.
             DirectoryInfo dir = new DirectoryInfo(sourceDirName);
@@ -37,7 +37,10 @@ namespace Unity3DBackup
             // Get the files in the directory and copy them to the new location.
             FileInfo[] files = dir.GetFiles();
             foreach (FileInfo file in files)
-            {
+            {                
+                if (excludedExtensions != null && excludedExtensions.Length > 0)
+                    if (excludedExtensions.Contains(file.Extension.ToLower()))
+                        continue;
                 string temppath = Path.Combine(destDirName, file.Name);
                 file.CopyTo(temppath, false);
             }
@@ -46,9 +49,9 @@ namespace Unity3DBackup
             if (copySubDirs)
             {
                 foreach (DirectoryInfo subdir in dirs)
-                {
+                {                    
                     string temppath = Path.Combine(destDirName, subdir.Name);
-                    Copy(subdir.FullName, temppath, copySubDirs);
+                    Copy(subdir.FullName, temppath, copySubDirs, excludedExtensions);
                 }
             }
 
